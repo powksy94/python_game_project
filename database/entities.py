@@ -54,7 +54,7 @@ class Character:
         return damage, skill_used
 
     # crée la fonction pour appliquer un effet
-    def apply_effect(self, skill, damage):
+    def apply_effect(self, skill, damage, target):
         # instancier la variable effet 
         effet = skill["effet"]
         # instancier la variable valeur
