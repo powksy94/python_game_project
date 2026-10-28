@@ -1,14 +1,12 @@
 # importer random et time
 import random, time
 
-from numpy import character
-
 # importer les classes character et monster depuis entities
-from .database.entities import Character, Monster
+from database.entities import Character, Monster
 # importer les collections characters et monsters depuis db_collections
-from .database.db_collections import monsters, players
+from database.db_collections import monsters, players
 # importer les outils du jeux depuis utils
-from .utils.utils import display_team, get_choices, display_available_characters
+from utils.utils import display_team, get_choices, display_available_characters
 
 # fonction créer une équipe
 def initiate_team(display_characters):
@@ -21,13 +19,13 @@ def initiate_team(display_characters):
     create_team(team, char_list)
     return team
 
-def select_character(char_list, current_size, team):
+def select_character(char_list, team):
      # fonction display_team
         display_team(team)
         # afficher (choisir un personnage (avec le nombre actuel de personnages choisi sur 3))
-        print(f" Choisir un personnage ({len(current_size)}/3) ")
+        print(f" Choisir un personnage ({len(team)}/3) ")
         # instancier la variable available avec l'appel de la fonction qui liste les personnages disponible
-        available = display_available_characters(char_list)
+        available = display_available_characters(char_list, team)
         # instancier la variable choix (en comptant les éléments de la liste available)
         choice = get_choices(len(available))
         # enlever le personnage choisi de la liste 
@@ -48,7 +46,7 @@ def build_monster(monster_data):
     return Monster(
         name=monster_data["name"],
         atk=monster_data["atk"],
-        def_val=monster_data["def"],
+        defense=monster_data["def"],
         pv=monster_data["pv"],
         atout=monster_data["atout"],
         ultime=monster_data["ultime"]
@@ -59,7 +57,7 @@ def create_team(team, char_list):
     # boucle infinie tant que l'équipe n'a pas 3 personnages
     while len(team) < 3:
         # attribuer à la variable char_data la méthode select_character
-        char_data = select_character(char_list, len(team))
+        char_data = select_character(char_list, team)
         # attribuer à la variable player la méthode build_character
         player = build_character(char_data)
         # ajouter le joueur selectionné à l'équipe
@@ -97,7 +95,7 @@ def init_kills(team):
     return {char.name: 0 for char in team}
 
 # fonction de selection aléatoire d'un monstre
-def random_select_monster():
+def spawn_random_monster():
     # instancier variable monster_data avec appel de la fonction random en parcourant la liste des monstres avec find
     monster_data = random.choice(list(monsters.find()))
     # renvoie la classe Monster avec chacun des paramètres du monstre
@@ -160,37 +158,63 @@ def display_results(player_name, score, kills):
 
 
 # fonction de sauvegarde de la partie
+def save_game(player_name, score,  kills):
     # inserer le joueur et ses scores dans la collection joueur
+    players.insert_one({"name": player_name, "score": score, "kills": kills})
 
 # fonction de gameplay 
+def play(player_name, team):
     # score instancié à 0
+    score = 0
     # variable kills appelant la fonction init kills de l'équipe
+    kills = init_kills(team)
 
     # boucle tant que l'équipe a des survivants et que le score est inférieur au nombre de tours maximum
+    while has_survivors(team) and score < MAX_ROUNDS:
         # variable hero avec le premier de l'équipe en vie
+        hero = get_first_alive(team)
         # variable ennemi avec appel de fonction random monstres
+        enemy = spawn_random_monster()
 
         # condition de combat (hero, enemy)
+        if fight(hero, enemy):
             # incrémenter score
+            score += 1
             # incrémenter les kills avec nom du personnage
+            kills[hero.name] += 1
             # afficher le montre vaincu et le score actuel de la partie
+            print(f"{enemy.name} est vaincu ! (Score = {score})")
             # appel fonction pause
+            pause_between_rounds()
+
     # appel fonction de la liste de score
+    display_results(player_name, score, kills)
     # sauvegarde de l'état de la partie
+    save_game(player_name, score, kills)
     # demande appuyer sur entrée
+    input("Appuyez sur entrée")
     # saut de ligne
+    line_break()
 
 # fonction afficher score 
+def display_ranking():
+    # Afficher titre classement
+    print("\n Classement ")
     # recuperer score à partir de la base
-        # ouvrir la base 
-        # acceder à la collection score
-            # find
-            # convertir curseur en list
-            # trier dans l'ordre décroissant du score
-            # pour chaque élément, joueur => énumerer avec le paramètre classement et 1
-                # afficher le score du joueur et son nombre de monstres vaincus
-                # si le joueur contient un élement dans kills
-                    # pour chaque nom de personnage, et son nombre dans la collection player paramètre kills
-                        # afficher le nom du personnage et le nombre de monstres vaincus
-            # demander appuyer sur entrée
-            # appel fonction saut de ligne
+    # ouvrir la base 
+    # instancier la variable ranking qui parcours players et trie dans l'ordre décroissant
+    ranking = players.find().sort("score", -1)
+    # pour chaque élément, joueur => énumerer avec le paramètre classement et 1
+    for i, player in enumerate(ranking, 1):
+        # afficher le score du joueur et son nombre de monstres vaincus
+        print(f"{i}. {player['name']} - {player['score']} monstres vaincus")
+        # si le joueur contient un élement dans kills
+        if "kills" in player:
+            # pour chaque nom de personnage, et son nombre dans la collection player paramètre kills
+            for char_name, count in player["kills"].items():
+                # afficher le nom du personnage et le nombre de monstres vaincus
+                print(f"    - {char_name} : {count} montres vaincus")
+    # demander appuyer sur entrée
+    input("Appuyez sur entrée")
+    # appel fonction saut de ligne
+    line_break()

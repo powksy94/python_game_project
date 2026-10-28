@@ -1,5 +1,5 @@
 from .db_init import get_db
-from ..data.data import CHARACTERS, MONSTERS
+from data.data import CHARACTERS, MONSTERS
 
 db = get_db()
 

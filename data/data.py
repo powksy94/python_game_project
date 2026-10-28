@@ -10,7 +10,7 @@ CHARACTERS = [
     { "name": "Paladin", "atk": 14, "def": 12, "pv": 110, "atout": { "name": "Soin", "effet": "heal", "valeur": 20, "cooldown": 3}, "ultime": { "name": "Lumière divine", "effet": "heal", "valeur": 40, "cooldown": 5}, },
     { "name": "Chevalier", "atk": 17, "def": 15, "pv": 120, "atout": { "name": "Parade", "effet": "def_boost", "valeur": 6, "cooldown": "2"}, "ultime": { "name": "Charge", "effet": "atk_boost", "valeur": 12, "cooldown": 4}, },
     { "name": "Voleur", "atk": 22, "def": 8, "pv": 85, "atout": { "name": "Esquive", "effet": "def_boost", "valeur": 4, "cooldown": 2}, "ultime": { "name": "Fatality", "effet": "atk_boost", "valeur": 14, "cooldown": 4} }
-],
+]
 
 MONSTERS = [
     { "name": "Gobelin", "atk": 10, "def": 5, "pv": 50, "atout": { "name": "Ruse", "effet": "atk_boost", "valeur": 3, "cooldown": 2}, "ultime": { "name": "Embuscade", "effet": "double_hit", "valeur": 0, "cooldown": 4} },
