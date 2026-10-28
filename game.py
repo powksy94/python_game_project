@@ -43,6 +43,7 @@ def build_character(char_data):
     )
 
 def build_monster(monster_data):
+    # instancier monster avec les paramètres de la classe Monster
     return Monster(
         name=monster_data["name"],
         atk=monster_data["atk"],
