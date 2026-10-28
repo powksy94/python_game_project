@@ -1,62 +1,163 @@
 # importer random et time
+import random, time
+
+from numpy import character
 
 # importer les classes character et monster depuis entities
+from .database.entities import Character, Monster
 # importer les collections characters et monsters depuis db_collections
+from .database.db_collections import monsters, players
 # importer les outils du jeux depuis utils
+from .utils.utils import display_team, get_choices, display_available_characters
 
 # fonction créer une équipe
+def initiate_team(display_characters):
     # instancier une list de personnage
+    char_list = list(display_characters)
     # tableau équipe = vide par défault
+    team = []
+
+    # instancier la variable create_team avec team et char_list en paramètres
+    create_team(team, char_list)
+    return team
+
+def select_character(char_list, current_size, team):
+     # fonction display_team
+        display_team(team)
+        # afficher (choisir un personnage (avec le nombre actuel de personnages choisi sur 3))
+        print(f" Choisir un personnage ({len(current_size)}/3) ")
+        # instancier la variable available avec l'appel de la fonction qui liste les personnages disponible
+        available = display_available_characters(char_list)
+        # instancier la variable choix (en comptant les éléments de la liste available)
+        choice = get_choices(len(available))
+        # enlever le personnage choisi de la liste 
+        return available[choice - 1]
+
+def build_character(char_data):
+    # instancier player avec les paramètres de la classe Character
+    return Character(
+        char_data["name"],
+        char_data["atk"],
+        char_data["def"],
+        char_data["pv"],
+        char_data["atout"],
+        char_data["ultime"],
+    )
+
+def build_monster(monster_data):
+    return Monster(
+        name=monster_data["name"],
+        atk=monster_data["atk"],
+        def_val=monster_data["def"],
+        pv=monster_data["pv"],
+        atout=monster_data["atout"],
+        ultime=monster_data["ultime"]
+    )
+
+def create_team(team, char_list):
 
     # boucle infinie tant que l'équipe n'a pas 3 personnages
-        # fonction display_team
-        # afficher (choisir un personnage (avec le nombre actuel de personnages choisi sur 3))
-        # instancier la variable available avec l'appel de la fonction qui liste les personnages disponible
-        # instancier la variable choix (en comptant les éléments de la liste available)
-        # enlever le personnage choisi de la liste 
-        # instancier player avec les paramètres de la classe Character
+    while len(team) < 3:
+        # attribuer à la variable char_data la méthode select_character
+        char_data = select_character(char_list, len(team))
+        # attribuer à la variable player la méthode build_character
+        player = build_character(char_data)
         # ajouter le joueur selectionné à l'équipe
+        team.append(player)
+
+    print("Equipe complète")
+    display_team(team)
+    return team
+
+# instancier la variable nombre maximum de tour à 10
+MAX_ROUNDS = 10
 
 # fonction d'attente entre chaque tour
+def time_between_rounds():
     # variable d'attente 
-        # appel de la fonction time pour attendre
+    wait = 1.5
+    print(" Prochain tour")
+    # appel de la fonction time pour attendre
+    time.sleep(wait)
 
 # fonction de saut de ligne 
+def line_break():
     # boucle for de 50 saut de ligne
+    print("\n" * 50)
 
 # fonction de pause entre chaque tour
+def pause_between_rounds():
     # appel de la fonction d'attente
+    time_between_rounds()
     # appel de la fonction saut de ligne
+    line_break()
 
 # fonction pour créer une liste qui va stocker les scores en cours de partie
+def init_kills(team):
+    return {char.name: 0 for char in team}
 
 # fonction de selection aléatoire d'un monstre
+def random_select_monster():
     # instancier variable monster_data avec appel de la fonction random en parcourant la liste des monstres avec find
+    monster_data = random.choice(list(monsters.find()))
     # renvoie la classe Monster avec chacun des paramètres du monstre
+    return build_monster(monster_data)
 
 # fonction qui vérifie les survivants
+def has_survivors(team):
     # renvoie les personnages survivants
+    return any(char.is_alive() for char in team)
+
+# fonction qui renvoie le premier perso vivant de l'équipe
+def get_first_alive(team):
+    return next((char for char in team if char.is_alive()), None)
 
 # fonction du système d'attaque 
+def perform_attack(attacker, defender):
+    # attribuer dmg et skill au personnage attaquant
+    dmg, skill = attacker.attack(defender)
     # afficher (perso attaque perso)
+    print(f" {attacker.name} inflige {dmg} dégâts à {defender.name}")
     # si perso a un skill
+    if skill:
         # affiche (perso utilise skill)
+        print(f" + {attacker.name} utilise [{skill}] !")
 
 # fonction de combat
+def fight(hero, enemy):
+    # afficher combat en cours
+    print(f"\nCombat : {hero.name} VS {enemy.name}")
     # boucle infinie tant que partie en cours 
+    while True:
         # appel fonction système attaque
+        perform_attack(hero, enemy)
         # condition si l'ennemi est mort
+        if not enemy.is_alive():
             # renvoie TRUE
+            return True
         # appel fonction pause
+        pause_between_rounds()
 
+        perform_attack(enemy, hero)
         # condition si le hero est mort
-            # renvoie TRUE
+        if not hero.is_alive():
+            # afficher la mort du héros
+            print(f"{hero.name} est tombé dans les ténèbres !")
+            line_break()
+            # renvoie FALSE
+            return False
         # appel fonction pause
+        pause_between_rounds()
 
 # fonction fin de partie
+def display_results(player_name, score, kills):
     # afficher game over
+    print(f"\n Game Over ! {player_name}, ton score: {score} monstres vaincus !")
         # pour chaque perso, compte de kill du perso
-            # afficher le nom et son compte de monstres vaincus
+    for name, count in kills.items():
+        # afficher le nom et son compte de monstres vaincus
+        print(f" - {name} - {count} monstres vaincus !")
+
 
 # fonction de sauvegarde de la partie
     # inserer le joueur et ses scores dans la collection joueur
