@@ -85,3 +85,23 @@ class Monster(Character):
     # pass pour remplir l'espace car classe héritée
     pass
 
+def build_character(char_data):
+    # instancier player avec les paramètres de la classe Character
+    return Character(
+        char_data["name"],
+        char_data["atk"],
+        char_data["def"],
+        char_data["pv"],
+        char_data["atout"],
+        char_data["ultime"],
+    )
+
+def build_monster(monster_data):
+    return Monster(
+        name=monster_data["name"],
+        atk=monster_data["atk"],
+        defense=monster_data["def"],
+        pv=monster_data["pv"],
+        atout=monster_data["atout"],
+        ultime=monster_data["ultime"]
+    )

@@ -1,3 +1,5 @@
+import time
+
 # fonction d'options du menu
 def menu_options ():
     # lancer jeu
@@ -71,3 +73,23 @@ def display_available_characters(char_list, team):
         print(f"{i} . {char["name"]} . (ATK : {char["atk"]}) . (DEF: {char["def"]}) . (PV: {char["pv"]}) ")
     # renvoyer la liste de disponibilité
     return available
+
+# fonction d'attente entre chaque tour
+def time_between_rounds():
+    # variable d'attente 
+    wait = 1.5
+    print(" Prochain tour")
+    # appel de la fonction time pour attendre
+    time.sleep(wait)
+
+# fonction de saut de ligne 
+def line_break():
+    # boucle for de 50 saut de ligne
+    print("\n" * 50)
+
+# fonction de pause entre chaque tour
+def pause_between_rounds():
+    # appel de la fonction d'attente
+    time_between_rounds()
+    # appel de la fonction saut de ligne
+    line_break()

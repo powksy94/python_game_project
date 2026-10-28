@@ -1,12 +1,12 @@
 # importer random et time
-import random, time
+import random
 
 # importer les classes character et monster depuis entities
-from database.entities import Character, Monster
+from database.entities import Character, Monster, build_character, build_monster
 # importer les collections characters et monsters depuis db_collections
 from database.db_collections import monsters, players
 # importer les outils du jeux depuis utils
-from utils.utils import display_team, get_choices, display_available_characters
+from utils.utils import display_team, get_choices, display_available_characters, pause_between_rounds, line_break
 
 # fonction créer une équipe
 def initiate_team(display_characters):
@@ -31,26 +31,7 @@ def select_character(char_list, team):
         # enlever le personnage choisi de la liste 
         return available[choice - 1]
 
-def build_character(char_data):
-    # instancier player avec les paramètres de la classe Character
-    return Character(
-        char_data["name"],
-        char_data["atk"],
-        char_data["def"],
-        char_data["pv"],
-        char_data["atout"],
-        char_data["ultime"],
-    )
 
-def build_monster(monster_data):
-    return Monster(
-        name=monster_data["name"],
-        atk=monster_data["atk"],
-        defense=monster_data["def"],
-        pv=monster_data["pv"],
-        atout=monster_data["atout"],
-        ultime=monster_data["ultime"]
-    )
 
 def create_team(team, char_list):
 
@@ -66,29 +47,6 @@ def create_team(team, char_list):
     print("Equipe complète")
     display_team(team)
     return team
-
-# instancier la variable nombre maximum de tour à 10
-MAX_ROUNDS = 10
-
-# fonction d'attente entre chaque tour
-def time_between_rounds():
-    # variable d'attente 
-    wait = 1.5
-    print(" Prochain tour")
-    # appel de la fonction time pour attendre
-    time.sleep(wait)
-
-# fonction de saut de ligne 
-def line_break():
-    # boucle for de 50 saut de ligne
-    print("\n" * 50)
-
-# fonction de pause entre chaque tour
-def pause_between_rounds():
-    # appel de la fonction d'attente
-    time_between_rounds()
-    # appel de la fonction saut de ligne
-    line_break()
 
 # fonction pour créer une liste qui va stocker les scores en cours de partie
 def init_kills(team):
@@ -141,7 +99,6 @@ def fight(hero, enemy):
         if not hero.is_alive():
             # afficher la mort du héros
             print(f"{hero.name} est tombé dans les ténèbres !")
-            line_break()
             # renvoie FALSE
             return False
         # appel fonction pause
@@ -168,9 +125,16 @@ def play(player_name, team):
     score = 0
     # variable kills appelant la fonction init kills de l'équipe
     kills = init_kills(team)
+    # instancier la variable nombre maximum de tour à 10
+    MAX_ROUNDS = 10
+
+    # instancier le nombre du tour actuel
+    current_round = 0
 
     # boucle tant que l'équipe a des survivants et que le score est inférieur au nombre de tours maximum
-    while has_survivors(team) and score < MAX_ROUNDS:
+    while has_survivors(team) and current_round < MAX_ROUNDS:
+        # incrémenter la variable du tour actuel 
+        current_round += 1
         # variable hero avec le premier de l'équipe en vie
         hero = get_first_alive(team)
         # variable ennemi avec appel de fonction random monstres
@@ -184,6 +148,8 @@ def play(player_name, team):
             kills[hero.name] += 1
             # afficher le montre vaincu et le score actuel de la partie
             print(f"{enemy.name} est vaincu ! (Score = {score})")
+            # saut de ligne
+            line_break()
             # appel fonction pause
             pause_between_rounds()
 
